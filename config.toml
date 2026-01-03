@@ -31,6 +31,7 @@ summaryLength = 50
 
     # Footer
     copyright = "© 2026 Chandra B Nair. [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)"
+    logo = "logo.svg"
 
 # Top Navigation Menu
 [[menu.main]]
@@ -57,3 +58,4 @@ summaryLength = 50
     name = "Email"
     url = "mailto:your-email@example.com" # Update this later
     weight = 20
+
