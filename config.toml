@@ -1,0 +1,59 @@
+baseURL = "https://chee-tzu.github.io/"
+title = "chee-tzu / root"
+theme = "hugo-ficurinia"
+languageCode = "en"
+summaryLength = 50
+
+[params]
+    author = "Chandra B Nair"
+    # This description shows up in search results and the browser tab
+    description = "Security Researcher | Reverse Engineering | Linux Internals"
+
+    # Ficurinia supports JetBrains Mono out of the box - perfect for your work
+    fontFamily = "JetBrains Mono"
+    titleFontFamily = "JetBrains Mono"
+    monospaceFontFamily = "JetBrains Mono"
+
+    # Minimalist security vibe settings
+    logoRightOfTitle = true
+    showTags = true
+    showRss = true
+    enableSearch = true
+    searchbarEverywhere = false
+    
+    # Content settings
+    posts = "posts"
+    showPostsLink = true
+    
+    # Hide the "featured image" in previews for a cleaner, terminal-like look
+    imageInArticlePreview = false
+    fitImageInArticlePreview = false
+
+    # Footer
+    copyright = "© 2026 Chandra B Nair. [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)"
+
+# Top Navigation Menu
+[[menu.main]]
+    identifier = "about"
+    name = "$ whoami"  # Using terminal syntax for style
+    url = "/about/"
+    weight = 10
+
+[[menu.main]]
+    identifier = "posts"
+    name = "/blog"
+    url = "/posts/"
+    weight = 20
+
+# Social Icons (These appear below the main menu)
+[[menu.icons]]
+    identifier = "github"
+    name = "GitHub"
+    url = "https://github.com/chee-tzu"
+    weight = 10
+
+[[menu.icons]]
+    identifier = "email"
+    name = "Email"
+    url = "mailto:your-email@example.com" # Update this later
+    weight = 20

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.schemastore.org/web-manifest-combined.json",
+  "name": "chee-tzu / root",
+  "short_name": "chee-tzu / root",
+  "start_url": "/",
+  "display": "standalone",
+  
+  
+  
+  "background_color": "#242629",
+  "theme_color": "#db5793"
+  
+    ,
+    "description": "Security Researcher | Reverse Engineering | Linux Internals"
+  
+  
+}
+
