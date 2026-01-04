@@ -9,12 +9,6 @@
             {{ end }}
             <div class="rightOfLogo">
                 <div class="titleAndHamburger">
-                    <h1>
-                        <a class="unstyledLink" href="/">{{ .Site.Title | default "Ficurinia" }}</a>
-                        {{ if .Site.Params.logoRightOfTitle | default false }}
-                            <img src='{{ .Site.Params.Logo | default "/logo.svg" }}' alt='{{ .Site.Params.LogoAltText | default "Logo" }}'/>
-                        {{ end }}
-                    </h1>
                     {{ if (.Site.Params.mobileHamburgerNav | default false) }}
                         <label id="hamburger-menu" for="main-nav-toggler">
                             &#xf85b;
