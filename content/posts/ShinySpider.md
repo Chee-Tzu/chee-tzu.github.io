@@ -1,7 +1,7 @@
 +++
 title = "ShinySpider"
 date = "2026-01-05"
-draft = true
+draft = false
 tags = ["malware", "windows"]
 +++
 # ShinySpider
