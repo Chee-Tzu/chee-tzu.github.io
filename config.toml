@@ -59,3 +59,7 @@ summaryLength = 50
     url = "mailto:your-email@example.com" # Update this later
     weight = 20
 
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
