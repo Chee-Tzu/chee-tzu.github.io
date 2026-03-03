@@ -1,0 +1,23 @@
++++
+title = "ShinySpider
+date = "2026-01-05"
+draft = true
+tags = ["malware", "windows"]
++++
+
+Well, this is my first blog post in this, and we're gonna look at a malware analysis challenge from the website [mallops](https://malops.io/)
+
+Rather than providing the answers to the questions in the website, I shall just show how I approached the challenge(Taking the direction of the questions). I am not very experienced with windows malwares, so I shall be learning as I go through the challenge
+
+Alright, lets get started!
+
+Question 1: `Which version of the Go compiler was used to build this binary?`
+
+Alright, so a `go` compiled binary, nothing that I haven't seen before. Alright lets just run `strings` on the binary to see if we find anything useful. A whole lotta strings, challenge could be statically linked.
+
+A simple google search with the question in mind provides us with this:
+`strings $(which go-bindata) | grep go1`, and we get the answer to our first question.
+
+Question 2: `What is the Relative Virtual Address (RVA) of the program's main function?`
+
+Now we're getting into the proper RE part of the 
