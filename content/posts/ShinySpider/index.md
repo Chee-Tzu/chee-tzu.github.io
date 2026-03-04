@@ -32,6 +32,7 @@ Now since Go uses its own scheduler, its startup is quite distinct from `C/C++` 
 ### Phase 1
 ### Hardware Handshake(`_start -> rt0_go`)
 1) CPUID check: Verifies process model(Intel/AMD) to ensure it supports necessary instructions, In the program you can see this:
+
 ![alt text](image-1.png)
 > *translates to "GenuineIntel"*
 
@@ -56,6 +57,7 @@ Now since Go uses its own scheduler, its startup is quite distinct from `C/C++` 
 ### Phase 5
 ### main function call
 Now we move to the `runtime_main` function. Here, I won't be explaining what everything is doing in the context of things as it's not our current objective (although I sidetracked a lot just before this), but just keep in mind that our `main.main` function call is only around the end of the function; the stuff above is a lot of initialization. 
+
 ![alt text](image-3.png)
 
 Although this is the unstripped binary, since the routine is similar, we just need to look for the same pattern in the provided malware to find out the location of our `main.main`.
@@ -71,7 +73,9 @@ Searching for `isRunningAsAdmin` we get this function `main_isRunningAsAdmin`, w
 Basically, you can't really have direct calls for APIs if you're trying to make malware, cause tools exist to statically check the APIs being called. So instead of that, we hash each API of specific libraries and go iteratively (can be however the malware author wants) and get the bytes, compare the hash of bytes of that function with the hash that is provided, and if they match, that particular API is called.
 
 Alright now when you check inside the function you can directly see the function `HCWin_apihash___APIHash__GetCurrentProcess` being called, checking inside it you can see this:
+
 ![alt text](image-4.png)
+
 so the first hash to be resolved inside the isAdminFunction is: `kernel32.dll.GetCurrentProcess`
 
 ## Question 4: `The binary calls GetTokenInformation. What specific token class (by name) is being requested to verify privileges?`
@@ -92,11 +96,17 @@ Alright so looking through `main.main` you can see the occurrence of the functio
 ## Question 6: `If the malware fails to retrieve the computer name via the Windows API, which environment variable does it read as a fallback to generate the system seed?`
 
 Well, time to go CTF mode again and search for the keyword `seed`. You see the function `main_getSystemSeed` which is being called by `main_generateMutexName`, which makes sense according to the question. 
+
 ![alt text](image-9.png) 
+
 Now after checking through the function we can see in the else condition, the arguments being passed is:
+
 ![alt text](image-10.png)
+
 which is "USERNAME", which seems to be the most probable cause it's supposed to be the alternate for when `GetComputerNameW` fails. And it's the correct one....
+
 ![alt text](image-11.png) 
+
 I guess half of being good at CTFs is being good at gambling.
 
 ## Question 7: `The function getSystemSeed dynamically loads a DLL to access GetComputerNameW. What is the name of this DLL?`
@@ -106,6 +116,7 @@ This one gets solved by the time we went through the previous function
 ## Question 8: `The malware prepends a specific string to the generated Mutex name to ensure the synchronization object is visible across all user sessions. What is this prefix?`
 
 ![alt text](image-12.png)
+
 We can see the `runtime_slicebytestostring` function, and its appending `Global/` at the front of the generated mutex name.
 
 After that, it calls the function `main_checkSingleInstance` where it resolves and calls the API `CreateMutexW` 
@@ -113,12 +124,15 @@ After that, it calls the function `main_checkSingleInstance` where it resolves a
 If I had to explain what these could be used for, I could do it like this(this could be wrong but I shall try to the best of my ability)
 
 Usually malwares run based on certain triggers, such as when a user logs into the system or when a certain application is opened so on and so forth, the issues with this is that when each time this is called if a new instace of the malware is spawned it can be suspecious. Or if each instace of the malware takes a lot of resources imagine if there were like 10 or 50 instances of it. So basically after the first instance of the malware runs, when the 2nd one(or more) runs they do:
+
 ![alt text](image-13.png)
+
 and kill themselves.
 
 ## Question 9: `Which specific Windows error code does the checkSingleInstance function check to see if the Mutex already exists?`
 
 ![alt text](image-14.png)
+
 Hmmm I wonder which one it could be. 
 `0xB7` stands for `ERROR_ALREADY_EXISTS` so it knows that another instance is running so it can kill itself.
 
@@ -132,7 +146,9 @@ Another issue with multiple isntances I suppose is that, if its something like a
 
 we can see the value `500000000` being passed as the second argument for this function. 
 I mean the second I saw that, i already tried `500ms` as the answer which worked...
+
 ![alt text](image-17.png)
+
 But aside from that, I wanted to try and figure out how its being done. 
 `mov     [rsp+48h+arg_8], rbx`
 `mov rcx, [rsp+48h+arg_8]`
@@ -156,11 +172,14 @@ which makes it clear that this is the function that deals with the time/polling.
 ## Question 11: `To prevent victims from restoring files, the malware executes a specific function to remove Windows Volume Shadow Copies. What is the name of this function?`
 
 Hmmm I wonder where the functions could be...
+
 ![alt text](image-18.png)
 
 ##Question 12: `How many distinct services or processes is the malware configured to terminate (kill)?`
 
-I found the logic to be in `main_killBlacklistedServices` function, you can see the first for loop, which is using the value from the address for no of iterations. ![alt text](image-19.png)
+I found the logic to be in `main_killBlacklistedServices` function, you can see the first for loop, which is using the value from the address for no of iterations.
+
+![alt text](image-19.png)
 
 ## Question 13: `What is the memory address of the string data for the first service in the kill list?`
 
@@ -181,6 +200,7 @@ I mean, the location is provided anyways, so.. yes.
 ### Question 15 : `To identify vulnerable file shares for lateral movement, the malware checks for a specific open port number. What is this port?`
 
 Intially the solve for this came by just searching for the name `Port` in the IDA functions. 
+
 ![alt text](image-20.png)
 ![alt text](image-21.png)
 ![alt text](image-22.png)
@@ -204,9 +224,13 @@ inside this the first one for the directories section is the answer to our quest
 ## Question 17: `To avoid encrypting its own instructions, the malware excludes a specific filename from the encryption list. What is the name of this note file?`
 
 This one actually took a bit of time, cause I missed that function while cleaning up the code. 
+
 ![alt text](image-24.png)
+
 but yes, its there in the same function in this section.
+
 ![alt text](image-25.png)
+
 which holds our file name. 
 
 ## Question 18: `The malware uses a checksum algorithm to identify files it has already encrypted. What is the expected total length (including the dot) of the extension validated in 'isValidExtension'?`
@@ -217,6 +241,7 @@ But let us
 check the function `isValidExtension` anyways to see whats up
 
 hmmm....
+
 ![alt text](image-28.png)
 
 But from what I see (I used LLM cause too many numbers), it's basically doing a base62 character validation and then doing a checksum loop. This function is called again in `main_encryptFile`.
@@ -229,12 +254,15 @@ But inside the function I see the function `sub_CFB8C0` which I thought was a li
 
 ![alt text](image-29.png)
 ![alt text](image-30.png)
+
 This is the Key and IV for the encryption.
 
 ## Question 20: `To secure the per-file symmetric keys, the malware encrypts them using a public key algorithm. Which specific padding scheme is used with RSA?`
 
 I lowkey just googled RSA padding schemes and tried to match the `****` for this. But let's just see what's up. Right after the key and the IV is created, there is a function call and after the `main_loadRSAPublicKeyFromModulus` is called, we see a function with quite a number of arguments being passed to it (in this screenshot I've renamed it).
+
 ![alt text](image-31.png)
+
 Looking through the function briefly I see the function `crypto_internal_fips140_rsa_EncryptOAEP` around the end of the function, which I guess is how you're supposed to find the solution for this question.
 
 ## Question 21: `The malware creates a header for encrypted files. What 4-byte ASCII string (Magic Marker) is written at the very end of the file header?`
@@ -277,8 +305,10 @@ Searching for the keyword "wallpaper" in the IDA functions, we get to see the fu
 ## Question 25: `n the fallback self-destruct mechanism, the malware drops a VBScript to disk. Which Windows executable is explicitly invoked to run this script silently?`
 
 `main_selfDestruct` - this might be the function. perchance. Inside this function another function `main_deleteSelfViaWMI` is being called.
-Here we can see that a VBScript is dropped to disk (`cleanup.Vbs`). The function calls the Sprintf with a hardcoded template
+Here we can see that a VBScript is dropped to disk (`cleanup.Vbs`). The function calls the Sprintf with a hardcoded template.
+
 ![alt text](image-35.png)
+
 Now this format takes %d - for the malware's PID and which is called from `kernel_32/GetCurrentProcessId` and a %s to delete the malware binary itself by taking its path (one of the arguments for this function).
 `sub_CD0360` is a file write(file name and permissions being written to it)
 
